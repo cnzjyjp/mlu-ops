@@ -49,81 +49,8 @@ class Stest(object):
                 task_id = cluster_id * tgt.core_num + core_id
 
                 start = task_id * data_each_task
-                # GNG
-                # for i in range(loop_num, pipeline = True):
-                #     buffer_a = tcp.alloc_buffer(
-                #             [data_each_buffer], dtype=self.dtype, scope="nram"
-                #     )  
-                #     buffer_b = tcp.alloc_buffer(
-                #             [data_each_buffer], dtype=self.dtype, scope="nram"
-                #     ) 
-                #     buffer_c = tcp.alloc_buffer(
-                #             [data_each_buffer], dtype=self.dtype, scope="nram"
-                #     )  
-                #     with tcp.block("data_copy"):                   
-                #         tcp.memcpy(buffer_a[0:data_each_buffer], buffer_in0[start+ i * data_each_buffer: start + (i+1) * data_each_buffer])
-                #         tcp.memcpy(buffer_b[0:data_each_buffer], buffer_in1[start+ i * data_each_buffer: start + (i+1) * data_each_buffer])
-                #     with tcp.block("compute"):
-                #         self.stest_body(buffer_c,buffer_a,buffer_b)
-                #     with tcp.block("data_copy"):
-                #         tcp.memcpy(buffer_out[start+ i * data_each_buffer: start + (i+1) * data_each_buffer], buffer_c[0:data_each_buffer])
                 
-                # if rest > 0:
-                #     buffer_a = tcp.alloc_buffer(
-                #             [data_each_buffer], dtype=self.dtype, scope="nram"
-                #     )  
-                #     buffer_b = tcp.alloc_buffer(
-                #             [data_each_buffer], dtype=self.dtype, scope="nram"
-                #     ) 
-                #     buffer_c = tcp.alloc_buffer(
-                #             [data_each_buffer], dtype=self.dtype, scope="nram"
-                #     )
-                #     tcp.memcpy(buffer_a[0:rest], buffer_in0[start+ loop_num * data_each_buffer: start+ loop_num * data_each_buffer+rest])
-                #     tcp.memcpy(buffer_b[0:rest], buffer_in1[start+ loop_num * data_each_buffer: start+ loop_num * data_each_buffer+rest])
-                #     self.stest_body(buffer_c,buffer_a,buffer_b)
-                #     tcp.memcpy(buffer_out[start+ loop_num * data_each_buffer: start + loop_num * data_each_buffer+rest], buffer_c[0:rest])
-
-                # GSNG1
-                # tcp.timer_start()
-                # for i in range(loop_num, pipeline = True):
-                #     buffer_n = tcp.alloc_buffer(
-                #             [data_each_buffer], dtype=self.dtype, scope="nram"
-                #     )   
-                #     buffer_s = tcp.alloc_buffer(
-                #             [data_each_buffer], dtype=self.dtype, scope="sram"
-                #     )  
-                #     if(flag == 1 and i == loop_num-1):
-                #         data_each_buffer = rest
-                #     with tcp.block("data_copy"):
-                #         tcp.memcpy(buffer_s[0: data_each_buffer], buffer_in[start: start+data_each_buffer])
-                #     with tcp.block("compute"):
-                #         tcp.memcpy(buffer_n[0: data_each_buffer], buffer_s[0: data_each_buffer])
-                #         self.timetest_body(buffer_n[0:data_each_buffer])
-                #     with tcp.block("data_copy"):
-                #         tcp.memcpy(buffer_out[start: start+data_each_buffer], buffer_n[0: data_each_buffer])
-                # tcp.timer_stop()
-
-                # GSNG2
-                # tcp.timer_start()
-                # for i in range(loop_num, pipeline = True):
-                #     buffer_n = tcp.alloc_buffer(
-                #             [data_each_buffer], dtype=self.dtype, scope="nram"
-                #     )   
-                #     buffer_s = tcp.alloc_buffer(
-                #             [data_each_buffer], dtype=self.dtype, scope="sram"
-                #     )  
-                #     if(flag == 1 and i == loop_num-1):
-                #         data_each_buffer = rest
-                #     with tcp.block("data_copy"):
-                #         tcp.memcpy(buffer_s[0: data_each_buffer], buffer_in[start: start+data_each_buffer])
-                #     with tcp.block("data_copy"):
-                #         tcp.memcpy(buffer_n[0: data_each_buffer], buffer_s[0: data_each_buffer])
-                #     with tcp.block("compute"):
-                #         self.timetest_body(buffer_n[0:data_each_buffer])
-                #         tcp.memcpy(buffer_out[start: start+data_each_buffer], buffer_n[0: data_each_buffer])
-                # tcp.timer_stop()
-
-                # GSNSG0
+                #GSNSG
                 for i in range(loop_num, pipeline = True):
                     buffer_as = tcp.alloc_buffer(
                             [data_each_buffer], dtype=self.dtype, scope="sram"
