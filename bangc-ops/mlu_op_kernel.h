@@ -38,6 +38,16 @@
 extern "C" {
 #endif  // __cplusplus
 
+/* RoiAlignRotated */
+struct mluOpRoiAlignRotatedParams {
+  int pooled_height;
+  int pooled_width;
+  int sample_ratio;
+  float spatial_scale;
+  bool aligned;
+  bool clockwise;
+};
+
 /* Abs */
 void MLUOP_WIN_API mluOpBlockKernel3StagePipelineAbsHalfFast(
     cnrtDim3_t k_dim, cnrtFunctionType_t k_type, cnrtQueue_t queue,
@@ -99,8 +109,8 @@ void MLUOP_WIN_API mluOpUBestKernelGenerateProposalsV2Float(
     float *rpn_rois, float *rpn_roi_probs, int *rpn_rois_num,
     int *rpn_rois_batch_size, const int pre_nms_top_n, const int post_nms_top_n,
     const float nms_thresh, const float min_size, const float eta,
-    bool pixel_offset, const int batch_size, const int Anchors_num, const int H,
-    const int W);
+    const bool pixel_offset, const int batch_size, const int Anchors_num,
+    const int H, const int W);
 
 /* poly_nms */
 void MLUOP_WIN_API mluOpBlockKernelPolyNmsCalcAreaFloat(
@@ -148,6 +158,43 @@ void MLUOP_WIN_API mluOpBlockKernelPriorBoxFloat(
     const bool min_max_aspect_ratios_order, void *output, const int output_size,
     void *var, const int var_size);
 
+/* VoxelPooling */
+void MLUOP_WIN_API mluOpUnionKernelVoxelPoolingForwardFloat(
+    cnrtDim3_t k_dim, cnrtFunctionType_t k_type, cnrtQueue_t queue,
+    const int batch_size, const int num_points, const int num_channels,
+    const int num_voxel_x, const int num_voxel_y, const int num_voxel_z,
+    const void *geom_xyz, const void *input_features, void *output_features,
+    void *pos_memo);
+
+/* BoxIouRotated */
+void MLUOP_WIN_API mluOpUnionKernelBoxIouRotatedFloat(
+    cnrtDim3_t k_dim, cnrtFunctionType_t k_type, cnrtQueue_t queue,
+    const void *box1, const void *box2, void *ious, const int num_box1,
+    const int num_box2, const int mode, const bool aligned);
+
+/* RoiAlignRotated */
+void MLUOP_WIN_API mluOpBlockKernelRoiAlignRotatedForwardFloat(
+    cnrtDim3_t k_dim, cnrtFunctionType_t k_type, cnrtQueue_t queue,
+    const void *features, const void *rois, const int batch, const int height,
+    const int width, const int channel, const int rois_num,
+    const mluOpRoiAlignRotatedParams rroiAlignParams, void *output);
+void MLUOP_WIN_API mluOpBlockKernelRoiAlignRotatedForwardHalf(
+    cnrtDim3_t k_dim, cnrtFunctionType_t k_type, cnrtQueue_t queue,
+    const void *features, const void *rois, const int batch, const int height,
+    const int width, const int channel, const int rois_num,
+    const mluOpRoiAlignRotatedParams rroiAlignParams, void *output);
+
+void MLUOP_WIN_API mluOpBlockKernelRoiAlignRotatedBackwardFloat(
+    cnrtDim3_t k_dim, cnrtFunctionType_t k_type, cnrtQueue_t queue,
+    const void *top_grad, const void *rois, const int batch, const int height,
+    const int width, const int channel, const int rois_num,
+    const mluOpRoiAlignRotatedParams rroiAlignParams, void *bottom_grad);
+void MLUOP_WIN_API mluOpBlockKernelRoiAlignRotatedBackwardHalf(
+    cnrtDim3_t k_dim, cnrtFunctionType_t k_type, cnrtQueue_t queue,
+    const void *top_grad, const void *rois, const int batch, const int height,
+    const int width, const int channel, const int rois_num,
+    const mluOpRoiAlignRotatedParams rroiAlignParams, void *bottom_grad);
+
 /* RoICrop*/
 void MLUOP_WIN_API mluOpBlockKernelRoiCropForwardFloat(
     cnrtDim3_t k_dim, cnrtFunctionType_t k_type, cnrtQueue_t queue,
@@ -160,6 +207,31 @@ void MLUOP_WIN_API mluOpBlockKernelRoiCropBackwardFloat(
     const void *grad_output, const void *grid, const int batch,
     const int height, const int width, const int channels, const int grid_n,
     const int output_h, const int output_w, void *grad_input);
+
+/* RotatedFeatureAlign */
+void MLUOP_WIN_API mluOpBlockKernelRotatedFeatureAlignForwardFloat(
+    cnrtDim3_t k_dim, cnrtFunctionType_t k_type, cnrtQueue_t queue,
+    const void *input, const void *bboxes, const int batches, const int height,
+    const int width, const int channels, const int offset_rois,
+    const float spatial_scale, const int points, void *output);
+void MLUOP_WIN_API mluOpBlockKernelRotatedFeatureAlignForwardHalf(
+    cnrtDim3_t k_dim, cnrtFunctionType_t k_type, cnrtQueue_t queue,
+    const void *input, const void *bboxes, const int batches, const int height,
+    const int width, const int channels, const int offset_rois,
+    const float spatial_scale, const int points, void *output);
+
+void MLUOP_WIN_API mluOpBlockKernelRotatedFeatureAlignBackwardFloat(
+    cnrtDim3_t k_dim, cnrtFunctionType_t k_type, cnrtQueue_t queue,
+    const void *top_output, const void *bboxes, const int batches,
+    const int height, const int width, const int channels,
+    const int offset_rois, const float spatial_scale, const int points,
+    void *bottom_input);
+void MLUOP_WIN_API mluOpBlockKernelRotatedFeatureAlignBackwardHalf(
+    cnrtDim3_t k_dim, cnrtFunctionType_t k_type, cnrtQueue_t queue,
+    const void *top_output, const void *bboxes, const int batches,
+    const int height, const int width, const int channels,
+    const int offset_rois, const float spatial_scale, const int points,
+    void *bottom_input);
 
 /* Sqrt */
 void MLUOP_WIN_API mluOpBlockKernel3StagePipelineSqrtHalfFast(
@@ -214,17 +286,105 @@ void MLUOP_WIN_API mluOpUnionKernelThreeInterpolateForwardHalf(
 /* Expand */
 void MLUOP_WIN_API mluOpUnion1KernelExpandTensor(
     cnrtDim3_t k_dim, cnrtFunctionType_t k_type, cnrtQueue_t queue,
-    const void *input, void *output, const int input_1, const int input_2,
-    const int input_3, const int input_4, const int input_5, const int input_6,
-    const int input_7, const int input_8, const int output_1,
-    const int output_2, const int output_3, const int output_4,
-    const int output_5, const int output_6, const int output_7,
-    const int output_8, const int dtype_size);
+    const void *input, void *output, const uint32_t input_1,
+    const uint32_t input_2, const uint32_t input_3, const uint32_t input_4,
+    const uint32_t input_5, const uint32_t input_6, const uint32_t input_7,
+    const uint32_t input_8, const uint32_t output_1, const uint32_t output_2,
+    const uint32_t output_3, const uint32_t output_4, const uint32_t output_5,
+    const uint32_t output_6, const uint32_t output_7, const uint32_t output_8,
+    const int dtype_size);
 
 void MLUOP_WIN_API mluOpUnion1KernelExpandOneDim(
     cnrtDim3_t k_dim, cnrtFunctionType_t k_type, cnrtQueue_t queue,
-    const void *input, void *output, const int high_num, const int expand_num,
-    const int low_num, const int dtype_size);
+    const void *input, void *output, const uint32_t high_num,
+    const uint32_t expand_num, const uint32_t low_num, const int dtype_size);
+
+/* Psamask */
+typedef enum {
+  COLLECT = 0,
+  DISTRIBUTE = 1,
+} psamaskType_t;
+
+typedef enum {
+  PARTITION_N = 0,
+  PARTITION_H = 1,
+} dimPartitionType_t;
+
+struct PartitionSeg {
+  int h_per_cluster;
+  int n_per_cluster;
+  int h_per_core;
+  int n_per_core;
+  dimPartitionType_t cluster_partition;
+  dimPartitionType_t core_partition;
+};
+
+struct Shape {
+  int n;
+  int h;
+  int w;
+  int c;
+};
+
+struct LimitParam {
+  int n;
+  int h;
+  int w;
+};
+
+struct PositionInCore {
+  int n_start;
+  int n_end;
+  int h_start;
+  int h_end;
+  int w_start;
+  int w_end;
+};
+
+void MLUOP_WIN_API mluOpUnion1KernelPsamaskForwardFloat(
+    cnrtDim3_t k_dim, cnrtFunctionType_t k_type, cnrtQueue_t queue,
+    const float *x, float *y, const psamaskType_t psa_type,
+    const dimPartitionType_t core_partition,
+    const dimPartitionType_t cluster_partition, const int batch,
+    const int h_feature, const int w_feature, const int h_mask,
+    const int w_mask, const int x_c, const int y_c, const int half_h_mask,
+    const int half_w_mask, const int n_per_core, const int h_per_core,
+    const int n_per_cluster, const int h_per_cluster, const int limit_n_seg,
+    const int limit_h_seg, const int limit_w_seg);
+
+void MLUOP_WIN_API mluOpUnion1KernelPsamaskBackwardFloat(
+    cnrtDim3_t k_dim, cnrtFunctionType_t k_type, cnrtQueue_t queue,
+    const float *y, float *x, const psamaskType_t psa_type,
+    const dimPartitionType_t core_partition,
+    const dimPartitionType_t cluster_partition, const int batch,
+    const int h_feature, const int w_feature, const int h_mask,
+    const int w_mask, const int x_c, const int y_c, const int half_h_mask,
+    const int half_w_mask, const int n_per_core, const int h_per_core,
+    const int n_per_cluster, const int h_per_cluster, const int limit_n_seg,
+    const int limit_h_seg, const int limit_w_seg);
+
+/* voxelization */
+void MLUOP_WIN_API mluOpUnionKernelDynamicVoxelize(
+    cnrtDim3_t k_dim, cnrtFunctionType_t k_type, cnrtQueue_t queue,
+    const void *points, const void *voxel_size, const void *coors_range,
+    void *coors, const int32_t num_points, const int32_t num_features);
+
+void MLUOP_WIN_API mluOpUnionKernelPoint2Voxel(
+    cnrtDim3_t k_dim, cnrtFunctionType_t k_type, cnrtQueue_t queue, void *coors,
+    void *point_to_pointidx, void *point_to_voxelidx, const int32_t num_points,
+    const int32_t max_points);
+
+void MLUOP_WIN_API mluOpUnionKernelCalcPointsPerVoxel(
+    cnrtDim3_t k_dim, cnrtFunctionType_t k_type, cnrtQueue_t queue,
+    void *point_to_pointidx, void *point_to_voxelidx, void *coor_to_voxelidx,
+    void *num_points_per_voxel, void *voxel_num, const int32_t max_voxels,
+    const int32_t num_points);
+
+void MLUOP_WIN_API mluOpUnionKernelAssignVoxelsCoors(
+    cnrtDim3_t k_dim, cnrtFunctionType_t k_type, cnrtQueue_t queue,
+    const void *points, void *temp_coors, void *point_to_voxelidx,
+    void *coor_to_voxelidx, void *voxels, void *coors, const int32_t max_points,
+    const int32_t num_points, const int32_t num_features);
 
 #if defined(__cplusplus)
 }
